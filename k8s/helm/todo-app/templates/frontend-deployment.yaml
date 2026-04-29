@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-frontend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: todo-app
+    component: frontend
+    {{- range $k, $v := .Values.labels }}
+    {{ $k }}: {{ $v | quote }}
+    {{- end }}
+    {{- if .Values.environment }}
+    environment: {{ .Values.environment | quote }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.frontend.replicas }}
+  selector:
+    matchLabels:
+      app: todo-app
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: todo-app
+        component: frontend
+        {{- range $k, $v := .Values.labels }}
+        {{ $k }}: {{ $v | quote }}
+        {{- end }}
+        {{- if .Values.environment }}
+        environment: {{ .Values.environment | quote }}
+        {{- end }}
+    spec:
+      containers:
+        - name: frontend
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: API_URL
+              value: {{ .Values.config.apiUrl | quote }}
+            - name: PORT
+              value: "3000"
+          resources:
+            {{- toYaml .Values.frontend.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 2
+            periodSeconds: 5

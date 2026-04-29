@@ -1,0 +1,27 @@
+environment: prod
+
+frontend:
+  replicas: 2
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 100m
+    limits:
+      memory: 128Mi
+      cpu: 500m
+
+backend:
+  replicas: 3
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 250m
+    limits:
+      memory: 384Mi
+      cpu: "1"
+
+# PROD: приложение в namespace todo-prod, БД в todo-demo. FQDN!
+# Пароль в проде задаётся через --set или CI Secret, не здесь.
+database:
+  host: "postgres-0.postgres.todo-demo.svc.cluster.local"
+  password: "REPLACE_VIA_CI_OR_SET_FLAG"

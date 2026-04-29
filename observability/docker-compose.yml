@@ -1,0 +1,76 @@
+# Локальный стек наблюдаемости для TODO (лаб. 7).
+# Запуск: docker compose up -d
+#
+# Порты на хосте:
+#   Prometheus 19090, Grafana 13001, Tempo 13200,
+#   OTLP 14317-14318, Loki 13100
+name: todo-observability
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.53.3
+    container_name: todo-prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./compose/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "19090:9090"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    restart: unless-stopped
+
+  tempo:
+    image: grafana/tempo:2.6.1
+    container_name: todo-tempo
+    command:
+      - "-config.file=/etc/tempo.yaml"
+    volumes:
+      - ./compose/tempo/tempo.yaml:/etc/tempo.yaml:ro
+    ports:
+      - "13200:3200"
+      - "14317:4317"
+      - "14318:4318"
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: todo-loki
+    command: -config.file=/etc/loki/loki.yaml
+    volumes:
+      - ./compose/loki/loki.yaml:/etc/loki/loki.yaml:ro
+    ports:
+      - "13100:3100"
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    container_name: todo-promtail
+    command: -config.file=/etc/promtail/promtail.yaml
+    volumes:
+      - ./compose/loki/promtail.yaml:/etc/promtail/promtail.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    depends_on:
+      - loki
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: todo-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_DEFAULT_THEME: dark
+    volumes:
+      - ./compose/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./compose/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "13001:3000"
+    depends_on:
+      - prometheus
+      - tempo
+      - loki
+    restart: unless-stopped

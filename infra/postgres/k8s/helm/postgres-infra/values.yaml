@@ -1,0 +1,28 @@
+# postgres-infra: дефолтные значения. Для окружений — values-dev.yaml / values-prod.yaml.
+environment: ""
+
+image:
+  repository: postgres
+  tag: "15-alpine"
+  pullPolicy: IfNotPresent
+
+# Контракт с приложением: эти значения попадают в Secret postgres-credentials,
+# а строка подключения для приложения формируется как
+#   postgres://{auth.username}:{auth.password}@postgres-0.postgres:5432/{auth.database}
+auth:
+  username: todo
+  password: todo
+  database: todo
+
+storage:
+  size: 1Gi
+  # Пусто = использовать default StorageClass кластера (Docker Desktop его создаёт).
+  storageClassName: ""
+
+resources:
+  requests:
+    memory: 128Mi
+    cpu: 50m
+  limits:
+    memory: 384Mi
+    cpu: 500m

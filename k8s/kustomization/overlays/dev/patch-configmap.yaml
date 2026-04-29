@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: todo-config
+data:
+  # DEV: браузер обращается к backend через kubectl port-forward (localhost:8080).
+  # Внутренний адрес http://todo-backend:8080 доступен только внутри кластера,
+  # но не из браузера на хосте.
+  API_URL: "http://localhost:8080"

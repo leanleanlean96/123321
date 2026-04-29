@@ -1,0 +1,66 @@
+# Значения по умолчанию. Для окружений используйте values-dev.yaml / values-prod.yaml.
+
+environment: ""
+imagePullPolicy: IfNotPresent
+
+frontend:
+  image:
+    repository: todo-frontend
+    tag: latest
+  replicas: 2
+  service:
+    type: ClusterIP
+    nodePort: null
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 50m
+    limits:
+      memory: 96Mi
+      cpu: 200m
+
+backend:
+  image:
+    repository: todo-backend
+    tag: latest
+  replicas: 2
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 100m
+    limits:
+      memory: 192Mi
+      cpu: 500m
+
+config:
+  apiUrl: "http://todo-backend:8080"
+
+# Контракт с инфраструктурой (см. infra/postgres). Можно задать database.url целиком,
+# либо указать поля и собрать URL в шаблоне templates/secret.yaml.
+database:
+  url: ""
+  host: "postgres-0.postgres"
+  port: 5432
+  name: todo
+  user: todo
+  password: todo
+
+# Опционально: трейсинг (lab7). Если endpoint пуст — env-переменные не задаются,
+# приложение работает без OTLP.
+otel:
+  endpoint: ""
+  serviceName: "todo-backend"
+
+labels:
+  "course.lab/example": todo-app
+
+ingress:
+  enabled: true
+  host: "todo.local"
+
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPU: 50
+  targetMemory: 70

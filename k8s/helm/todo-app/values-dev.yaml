@@ -1,0 +1,19 @@
+environment: dev
+
+frontend:
+  replicas: 1
+
+backend:
+  replicas: 1
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 100m
+    limits:
+      memory: 192Mi
+      cpu: 500m
+
+# DEV: БД в том же namespace (короткое DNS-имя).
+database:
+  host: "postgres-0.postgres"
+  password: todo

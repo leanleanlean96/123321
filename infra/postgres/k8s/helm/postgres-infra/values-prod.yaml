@@ -1,0 +1,18 @@
+environment: prod
+
+auth:
+  username: todo
+  # В реальном проде задать через --set или CI Secret.
+  password: REPLACE_VIA_CI
+  database: todo
+
+storage:
+  size: 10Gi
+
+resources:
+  requests:
+    memory: 512Mi
+    cpu: 250m
+  limits:
+    memory: 1Gi
+    cpu: "1"

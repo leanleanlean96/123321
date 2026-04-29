@@ -1,0 +1,24 @@
+# ServiceMonitor для backend приложения TODO.
+# Применять в namespace, где развёрнут Service todo-backend (todo-demo / todo-prod).
+#
+#   kubectl apply -f servicemonitor-backend.yaml -n todo-demo
+#
+# CRD ServiceMonitor поставляется вместе с kube-prometheus-stack.
+# Service todo-backend должен иметь порт с именем "http" (см. base/backend-service.yaml).
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: todo-backend
+  labels:
+    app: todo-app
+    component: backend
+spec:
+  selector:
+    matchLabels:
+      app: todo-app
+      component: backend
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s

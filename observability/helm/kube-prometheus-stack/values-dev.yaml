@@ -1,0 +1,66 @@
+# Урезанный профиль для учебного кластера (Docker Desktop).
+# Установка:
+#   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+#   helm repo update
+#   helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
+#     --namespace observability --create-namespace \
+#     -f values-dev.yaml
+
+defaultRules:
+  create: false
+
+alertmanager:
+  enabled: false
+
+nodeExporter:
+  enabled: false
+
+kubeStateMetrics:
+  enabled: false
+
+prometheus:
+  prometheusSpec:
+    retention: 24h
+    scrapeInterval: 15s
+    # Важно: без этого Prometheus будет искать ServiceMonitor только с метками Helm-релиза.
+    # Для учебного кластера разрешаем сбор любых ServiceMonitor.
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorNamespaceSelector: {}
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: "1"
+        memory: 2Gi
+
+grafana:
+  adminPassword: admin
+  persistence:
+    enabled: false
+  additionalDataSources:
+    - name: Tempo
+      type: tempo
+      uid: tempo
+      url: http://tempo.observability.svc.cluster.local:3200
+      access: proxy
+      jsonData:
+        httpMethod: GET
+        serviceMap:
+          datasourceUid: prometheus
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

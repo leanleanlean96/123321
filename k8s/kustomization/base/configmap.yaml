@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: todo-config
+  labels:
+    app: todo-app
+    component: config
+  annotations:
+    description: "Configuration for TODO application (no database manifests here)"
+data:
+  PORT_BACKEND: "8080"
+  PORT_FRONTEND: "3000"
+  HOST: "0.0.0.0"
+  # Адрес backend Service внутри кластера; кросс-namespace вариант — в overlays/prod.
+  API_URL: "http://todo-backend:8080"

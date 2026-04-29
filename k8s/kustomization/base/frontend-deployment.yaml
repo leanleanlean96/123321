@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-frontend
+  labels:
+    app: todo-app
+    component: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: todo-app
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: todo-app
+        component: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: todo-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: todo-config
+                  key: API_URL
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: todo-config
+                  key: PORT_FRONTEND
+          resources:
+            requests:
+              memory: 32Mi
+              cpu: 50m
+            limits:
+              memory: 96Mi
+              cpu: 200m
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 2
+            periodSeconds: 5
